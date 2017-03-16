@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>登录界面</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="css/index.css"/>
+    <script>
+        addEventListener("load", function() { setTimeout(hideURLbar, 0); }, false);
+        function hideURLbar(){ window.scrollTo(0,1); }
+    </script>
+</head>
+<body>
+<div class="wrap">
+    <div id="header">
+        登录或创建一个免费账户
+    </div>
+    <div id="content">
+        <div class="left">
+            <p>新账户</p>
+            <ul>
+                <li>
+                    <input type="text" placeholder="Username" required="required"/>
+                    <a href="#" class="icon hook"></a>
+                    <div class="clear"></div>
+                </li>
+                <li>
+                    <input type="text" placeholder="Email" required="required"/>
+                    <a href="#" class="icon hook"></a>
+                    <div class="clear"></div>
+                </li>
+                <li>
+                    <input type="password" placeholder="password" required="required"/>
+                    <a href="#" class="icon wrong"></a>
+                    <div class="clear">  </div>
+                </li>
+                <li>
+                    <input type="password" placeholder="password" required="required"/>
+                    <a href="#" class="icon wrong"></a>
+                    <div class="clear">  </div>
+                </li>
+                <label class="checkbox">
+                    <input type="checkbox" value="" checked="checked"/>
+                    Please inform me of upcoming w3layouts, Promotions and news
+                </label>
+                <input type="submit" value="创建用户"/>
+                <div class="clear"></div>
+            </ul>
+        </div>
+        <div class="right">
+            <p>登录</p>
+            <ul>
+                <li>
+                    <input type="text" placeholder="Username"/>
+                    <div class="clear"></div>
+                </li>
+                <li>
+                    <input type="password" placeholder="Password"/>
+                    <div class="clear"></div>
+                </li>
+                <h4>I forget my Password!</h4>
+                <input type="submit"  value="登录"/>
+            </ul>
+            <div class="clear"></div>
+        </div>
+
+    </div>
+</div>
+<div id="footer">
+    chris works
+</div>
+</body>
+</html>
