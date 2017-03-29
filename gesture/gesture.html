@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewpoint"/>
+    <meta charset="UTF-8">
+    <title>手势密码</title>
+    <link rel="stylesheet" href="css/index.css"/>
+</head>
+<body>
+<div class="content">
+    <h1 class="title">手势密码</h1>
+    <canvas id="canvas" width="300" height="300" >您的浏览器不支持canvas</canvas>
+    <h4 id="prompt">绘制解锁图案</h4>
+    <div class="choice">
+        <label for="set"><input type="radio" name="password" id="set" value="set" onclick="chooseState()"/>设置密码</label><br/>
+        <label for="reset"><input type="radio" name="password" id="reset" value="reset" onclick="chooseState()"/>验证密码</label>
+    </div>
+
+</div>
+<script>
+//    window.gesture = function(obj){
+//        this.height = obj.height;
+//        this.width = obj.width;
+////            this.choType = Number(window.localStorage.getItem("choType"))||obj.choType;//获取localstorage的choType值
+//    };
+    var arr=[];
+    var restPoint = [];
+    var prePoint = [];
+    var r;
+    var touchFlag = false;//触碰标志
+    var passwordStatus = {};
+    var canvas = document.getElementById("canvas");
+    var ctx = canvas.getContext("2d");
+    var type;
+    function chooseState(){
+//        console.log("123");
+        var radio = document.getElementsByName("password");
+//        console.log(radio[0].value);
+        for(var i =0;i<radio.length;i++) {
+            if (radio[i].checked) {
+                type = radio[i].value;
+//                console.log("234");
+            }
+        }
+
+//        console.log(type);
+        if(type=="set"){
+            passwordStatus = {};
+            localStorage.removeItem("gesturePsw");
+            activeEvent();
+        }else if(type=="reset"){
+//            createNinePoint();
+            passwordStatus = window.localStorage.getItem("gesturePsw")?{
+                status:"saved",
+                pwd:JSON.parse(window.localStorage.getItem("gesturePsw"))
+            }:{};
+//            activeEvent();
+        }
+
+    }
+
+    //        window.onload =createNinePoint;
+    function createNinePoint(){
+        var n = 3;
+        var count =0;
+//            var canvas = document.getElementById("canvas");
+//            var ctx = canvas.getContext("2d");
+        arr=[];
+        restPoint =[];
+        prePoint=[];
+        r = ctx.canvas.width/(2+4*n);
+//            var arr = [];
+//            var restPoint = [];
+        for(var i =0;i<n;i++){
+            for(var j=0;j<n;j++){
+                count++;
+                var point = {
+                    x:j*4*r + 3*r,
+                    y:i*4*r+3*r,
+                    index:count
+                };
+//                console.log("x,y",point.x,point.y);
+                arr.push(point);
+                restPoint.push(point);
+            }
+        }
+        ctx.clearRect(0,0,ctx.canvas.width, ctx.canvas.height);
+        for(var i =0;i<arr.length;i++){
+            drawCircle(arr[i].x,arr[i].y,r)
+        }
+
+    }
+    function drawCircle(x,y,r){
+//        console.log( x,y,r);
+//        var canvas = document.getElementById("canvas");
+//        var ctx = canvas.getContext("2d");
+        ctx.strokeStyle = "#FFA726";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+//            console.log(x,y,r);
+        ctx.arc(x,y,r,0,Math.PI*2,true);
+        ctx.closePath();
+        ctx.stroke();
+    }
+    function drawPoint(x,y){
+//        var canvas = document.getElementById("canvas");
+//        var ctx = canvas.getContext("2d");
+        ctx.fillStyle="#FFA726";
+        ctx.beginPath();
+        ctx.arc(x,y,r/2,0,Math.PI*2,true);
+        ctx.closePath();
+        ctx.fill();
+    }
+    function drawLine(position,prePoint){
+        ctx.beginPath();
+        ctx.lineWidth = 2;
+        ctx.moveTo(prePoint[0].x,prePoint[0].y);
+        for(var i =1;i<prePoint.length;i++){
+            ctx.lineTo(prePoint[i].x,prePoint[i].y)
+        }
+        ctx.lineTo(position.x,position.y);
+        ctx.stroke();
+        ctx.closePath();
+    }
+    function update(position){
+        ctx.clearRect(0,0,ctx.canvas.width,ctx.canvas.height);
+        for(var i =0;i<arr.length;i++){
+            drawCircle(arr[i].x,arr[i].y,r);
+        }
+        for(var i = 0;i<prePoint.length;i++){
+            drawPoint(prePoint[i].x,prePoint[i].y)
+        }
+        drawLine(position,prePoint);
+        for(var i=0;i<restPoint.length;i++){
+            if(Math.abs(restPoint[i].x- position.x)< r && Math.abs(restPoint[i].y-position.y)<r){
+                drawPoint(restPoint[i].x,restPoint[i].y);
+                prePoint.push(restPoint[i]);
+                restPoint.splice(i,1);
+                break;
+            }
+        }
+    }
+
+    function activeEvent(){
+        var that = this;
+        canvas.addEventListener("touchstart",function(e){
+            e.preventDefault();
+            var position = getPosition(e);
+            for(var i =0;i<arr.length;i++){
+                if(Math.abs(arr[i].x-position.x)<r && Math.abs(arr[i].y-position.y)<r){
+                    touchFlag = true;
+                    drawPoint(arr[i].x,arr[i].y);
+                    prePoint.push(arr[i]);
+                    restPoint.splice(i,1);
+                    break;
+                }
+            }
+        });
+        canvas.addEventListener("touchmove",function(e){
+            if(touchFlag){
+                update(getPosition(e));
+
+            }
+        },false);
+        canvas.addEventListener("touchend",function(e){
+            if(touchFlag){
+                touchFlag= false;
+                savePassword(prePoint);
+//                console.log("rest",restPoint.length);
+                setTimeout(function(){
+                    reset();
+                },200);
+            }
+        },false);
+//        document.addEventListener("touchmove",function(e){
+//            e.preventDefault();
+//        },false)
+
+
+    }
+    function getPosition(e){
+        var rect = e.currentTarget.getBoundingClientRect();
+        var position ={
+            x: e.touches[0].clientX - rect.left,
+            y: e.touches[0].clientY-rect.top
+        };
+        return position;
+
+    }
+    function savePassword(point){
+        if(passwordStatus.status=="saved"){
+            if(checkPass(passwordStatus.pwd,point)){
+                document.getElementById("prompt").innerHTML = "密码正确！";
+            }else{
+                document.getElementById("prompt").innerHTML = "输入的密码不正确";
+            }
+        }else if(passwordStatus.status=="saving"){
+            if(checkPass(passwordStatus.pwd,point)){
+                passwordStatus.status = "saved";
+                passwordStatus.pwd = point;
+                document.getElementById("prompt").innerHTML = "密码设置成功";
+                window.localStorage.setItem("gesturePsw",JSON.stringify(passwordStatus.pwd));
+            }else{
+                document.getElementById("prompt").innerHTML = "两次输入的不一致";
+                delete passwordStatus.status;
+            }
+
+        }else{
+            if(point.length<5){
+                document.getElementById("prompt").innerHTML = "密码太短，不少于5个点";
+
+            }else{
+                passwordStatus.status="saving";
+                passwordStatus.pwd = point;
+                document.getElementById("prompt").innerHTML = "请再次输入手势密码";
+            }
+
+        }
+
+    }
+    function checkPass(psw1,psw2){
+        //不能用长度比较
+        console.log(psw1);
+        console.log(psw2);
+//        if (psw1.length != psw2.length){
+////            console.log("长度不一致");
+//            return false;
+//        }else{
+        var psw1_content = "";
+        var psw2_content ="";
+
+//            if(psw1[i].index != psw2[i].index){
+////                   console.log("内容不相等");
+//                return false;
+//            }
+        for(var i = 0;i<psw1.length; i++){
+            psw1_content += psw1[i].index;
+        }
+        for(var i =0; i<psw2.length; i++){
+            psw2_content += psw2[i].index;
+        }
+        return psw1_content === psw2_content;
+
+
+
+    }
+    function reset(){
+
+        createNinePoint();
+
+
+    }
+
+    function main(){
+//            var context
+
+
+        createNinePoint();
+//        activeEvent()
+    }
+    window.onload = main;
+
+    //var test = document.getElementsByTagName("canvas")[0].style.width;
+    //        console.log("test:"+test);
+
+</script>
+</body>
+</html>
