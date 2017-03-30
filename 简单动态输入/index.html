@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <style>
+        .main{
+            position:relative;
+            width:40%;
+            margin:30% auto 0 auto;
+            /*top:30%;*/
+        }
+        #content{
+            border:none;
+            display:block;
+            width:100%;
+        }
+        ul{
+            list-style:none;
+            width:100%;
+        }
+        ul li{
+            border:1px solid #ccc;
+        }
+        .hide{
+            display:none;
+        }
+        .show{
+            display:block;
+        }
+    </style>
+</head>
+<body>
+<div class="main">
+    <ul>
+        <li><input type="text" id="content"/></li>
+        <li class="hide">1234</li>
+        <li class="hide">112211</li>
+        <li class="hide">112234</li>
+    </ul>
+</div>
+<script>
+    var content = document.getElementById("content");
+    var lists = document.getElementsByTagName("li");
+    content.onkeyup = function(){
+        var value = content.value;
+        for (var i =1;i<lists.length;i++){
+            if(lists[i].innerHTML.indexOf(value)!=-1){
+                lists[i].className = "show";
+            }
+            else{
+                lists[i].className = "hide";
+            }
+        }
+
+    };
+    content.onkeypress = function(event){
+        if(event.keyCode == 13){
+            var value = content.value;
+            var li = document.createElement("li");
+            var text = document.createTextNode(value);
+            li.appendChild(text);
+            li.className = "show";
+            var ul = document.getElementsByTagName("ul")[0];
+            ul.appendChild(li);
+            content.value = "";
+            setTimeout(function(){
+                clear()
+            },1000)
+        }
+    }
+    function clear(){
+        for(var i = 1;i<lists.length;i++){
+            lists[i].className="hide";
+        }
+    }
+</script>
+</body>
+</html>
